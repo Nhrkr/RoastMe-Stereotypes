@@ -8,7 +8,8 @@ from PIL import Image
 from io import BytesIO
 
 # Replace <Subscription Key> with your valid subscription key.
-subscription_key = "ef59bcec59284cd1aa19b0f38d8ee487"
+with open('Microsoft/subKey', 'r') as myfile:
+  subscription_key = myfile.read().replace('\n', '')
 assert subscription_key
 
 # You must use the same region in your REST call as you used to get your
