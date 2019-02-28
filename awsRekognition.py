@@ -1,36 +1,51 @@
 import urllib.request
 import boto3
+from botocore.exceptions import ClientError
 import os
 import csv
 import json
 import pandas as pd
 import jsonToCsv
 
-df = pd.read_csv('DataDump.csv')
+def check(s3, bucket, key):
+    try:
+        s3.Object(bucket, key).load()
+    except ClientError as e:
+        return int(e.response['Error']['Code']) != 404
+    return True
+
+df = pd.read_csv('faceplusplus/DataDump.csv')
 links = df.url
 ids = df.id
 count = 0
+bucket = "ub-roastme"
 os.makedirs("AWS", exist_ok=True)
 dataDump = open('AWS/DataDump.csv', 'w')
 csvwriter = csv.writer(dataDump)
 for link in links:
-    if link[-3:] == "jpg":
+    if link[-3:] in ["jpg", "JPG", "png", "PNG"]:
+        imageFile=ids[count]+link[-3:]
         print(link)
-        urllib.request.urlretrieve(link, "/home/gokul/Pictures/roast.jpg")
-        imageFile='/home/gokul/Pictures/roast.jpg'
-        client=boto3.client('rekognition')
+        s3 = boto3.resource(service_name = 's3')
+        if not check(s3, bucket, ids[count]+link[-3:]):
+            s3client = boto3.client('s3')
+            opener = urllib.request.build_opener()
+            opener.addheaders = [('User-agent', 'XynoBot')]
+            urllib.request.install_opener(opener)
+            urllib.request.urlretrieve(link, "/home/gokul/Pictures/roast.jpg")
+            s3client.upload_file("/home/gokul/Pictures/roast.jpg", bucket, imageFile)
         
-        with open(imageFile, 'rb') as image:
-            response = client.detect_faces(Image={'Bytes': image.read()}, Attributes = ["ALL"])
-            with open('AWS/'+ids[count]+'.json', 'w') as outfile:
-                json.dump(response, outfile)
-            row = [ids[count], link]
-            if count == 0:
-               	titles = ["id", "url"]
-               	jsonToCsv.getTitles(titles, response["FaceDetails"][0], "")
-               	csvwriter.writerow(titles)
-            count += 1
-            if response["FaceDetails"]:
-               	jsonToCsv.flatten(row, response["FaceDetails"][0])
-               	csvwriter.writerow(row)
+        client=boto3.client('rekognition')
+        response = client.detect_faces(Image={'S3Object':{'Bucket':bucket,'Name':imageFile}}, Attributes = ["ALL"])
+        with open('AWS/'+ids[count]+'.json', 'w') as outfile:
+            json.dump(response, outfile)
+        row = [ids[count], link]
+        if count == 0:
+            titles = ["id", "url"]
+            jsonToCsv.getTitles(titles, response["FaceDetails"][0], "")
+            csvwriter.writerow(titles)
+        count += 1
+        if response["FaceDetails"]:
+            jsonToCsv.flatten(row, response["FaceDetails"][0])
+            csvwriter.writerow(row)
 print('Done...')

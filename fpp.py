@@ -4,6 +4,7 @@ import csv
 import json
 import pandas as pd
 import jsonToCsv
+import time
 
 df = pd.read_csv('DataDump.csv')
 links = df.url
@@ -13,7 +14,7 @@ os.makedirs("faceplusplus", exist_ok=True)
 dataDump = open('faceplusplus/DataDump.csv', 'w')
 csvwriter = csv.writer(dataDump)
 for link in links:
-    if link[-3:] == "jpg":
+    if link[-3:] in ["jpg", "JPG", "png", "PNG"]:
         print(link)
         with open('faceplusplus/apiKey', 'r') as myfile:
             apiKey = myfile.read().replace('\n', '')
@@ -32,7 +33,7 @@ for link in links:
                 titles = ["id", "url"]
                 jsonToCsv.getTitles(titles, analysis["faces"][0]["attributes"], "")
                 csvwriter.writerow(titles)
-                count += 1
+            count += 1
             if analysis["faces"]:
                 jsonToCsv.flatten(row, analysis["faces"][0]["attributes"])
                 csvwriter.writerow(row)
