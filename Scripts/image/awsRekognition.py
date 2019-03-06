@@ -14,13 +14,13 @@ def check(s3, bucket, key):
         return int(e.response['Error']['Code']) != 404
     return True
 
-df = pd.read_csv('faceplusplus/DataDump.csv')
+df = pd.read_csv('../../Data/image/faceplusplus/DataDump.csv')
 links = df.url
 ids = df.id
 count = 0
 bucket = "ub-roastme"
-os.makedirs("AWS", exist_ok=True)
-dataDump = open('AWS/DataDump.csv', 'w')
+os.makedirs("../../Data/image/AWS", exist_ok=True)
+dataDump = open('../../Data/image/AWS/DataDump.csv', 'w')
 csvwriter = csv.writer(dataDump)
 for link in links:
     if link[-3:] in ["jpg", "JPG", "png", "PNG"]:
@@ -32,8 +32,8 @@ for link in links:
             opener = urllib.request.build_opener()
             opener.addheaders = [('User-agent', 'XynoBot')]
             urllib.request.install_opener(opener)
-            urllib.request.urlretrieve(link, "/home/gokul/Pictures/roast.jpg")
-            s3client.upload_file("/home/gokul/Pictures/roast.jpg", bucket, imageFile)
+            urllib.request.urlretrieve(link, "roast.jpg")
+            s3client.upload_file("roast.jpg", bucket, imageFile)
         
         client=boto3.client('rekognition')
         response = client.detect_faces(Image={'S3Object':{'Bucket':bucket,'Name':imageFile}}, Attributes = ["ALL"])

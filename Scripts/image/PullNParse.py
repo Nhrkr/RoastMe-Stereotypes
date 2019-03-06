@@ -4,7 +4,7 @@ import json
 
 count = "100"
 
-dataDump = open('DataDump.csv', 'w')
+dataDump = open('../../Data/image/DataDump.csv', 'w')
 csvwriter = csv.writer(dataDump)
 csvwriter.writerow(['id', 'title', 'comments', 'url'])
 session = requests.session()
@@ -13,7 +13,7 @@ for turn in range(3):
         r = session.get(url='https://reddit.com/r/roastme/top/.json?limit='+ count + '&t=all', headers = {'User-agent': 'XynoBot'})
     else:
         r = session.get(url='https://reddit.com/r/roastme/top/.json?limit='+ count + '&t=all&after=' + name, headers = {'User-agent': 'XynoBot'})
-    with open('metadata' + str(turn) + '.json', 'w') as outfile:
+    with open('../../Data/image/metadata' + str(turn) + '.json', 'w') as outfile:
         json.dump(r.json(), outfile)
     for item in r.json()['data']['children']:
         print(item['data']['url'])

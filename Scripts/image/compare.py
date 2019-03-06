@@ -4,8 +4,8 @@ import numpy as np
 import json
 import collections
 
-face = pd.read_csv('faceplusplus/DataDump.csv')
-aws = pd.read_csv('AWS/DataDump.csv')
+face = pd.read_csv('../../Data/image/faceplusplus/DataDump.csv')
+aws = pd.read_csv('../../Data/image/AWS/DataDump.csv')
 for i in range(len(aws['.Emotions'])):
     emotion_data = json.loads(aws['.Emotions'][i].replace("'",'"'))
     Newdict = {}
